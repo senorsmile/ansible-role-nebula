@@ -1,0 +1,19 @@
+---
+# inspired by https://github.com/AndrewPaglusch/Nebula-Installer/blob/master/main.yml
+#         and https://github.com/JonTheNiceGuy/Nebula-Demo-Install_and_Manage
+nebula_version: '1.3.0'
+nebula_group: "nebula_nodes"
+
+nebula_network_name: "Nebula Net"
+nebula_network_cidr: 16
+nebula_network_range: "172.16.0.0/{{ nebula_network_cidr }}"
+
+nebula_ca: False
+nebula_ca_cert_duration: "87600h1m0s" #10 years, 1 hour
+nebula_client_cert_duration: "8760h0m0s" #1 year
+
+nebula_lighthouse: False
+#nebula_lighthouse_hostname: lighthouse
+#nebula_lighthouse_internal_ip: 172.16.0.1
+#nebula_lighthouse_public_hostname: my-nebula-server.com
+nebula_lighthouse_public_port: 4242

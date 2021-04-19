@@ -1,0 +1,5 @@
+---
+- name: Restart Nebula
+  systemd:
+    name: nebula
+    state: restarted

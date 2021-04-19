@@ -1,0 +1,31 @@
+---
+- name: Create CA cert/key
+  shell: |
+    nebula-cert ca -name "{{ nebula_network_name }}" -duration "{{ nebula_ca_cert_duration }}"
+  args:
+    executable: /bin/bash
+    chdir: /etc/nebula
+    creates: /etc/nebula/ca.crt
+
+#- name: Create lighthouse cert/key pairs
+#  shell: |
+#    nebula-cert sign -name "{{ nebula_lighthouse_hostname }}" -ip "{{ nebula_lighthouse_internal_ip }}/{{ nebula_network_cidr }}" -duration "{{ nebula_client_cert_duration }}" {% if nebula_fw_groups is defined %}-groups "{% for group in nebula_fw_groups %}{{ group }}{{ ',' if not loop.last else '' }}{% endfor %}"{% endif %}
+#  args:
+#    executable: /bin/bash
+#    chdir: /etc/nebula
+#    creates: "/etc/nebula/{{ nebula_lighthouse_hostname }}.crt"
+
+
+- set_fact:
+    nebula_nodes_unflattened:
+      - "{{ groups['nebula_lighthouses'] }}"
+      - "{{ groups['nebula_nodes'] }}"
+
+- name: Create node cert/key pairs
+  shell: |
+    nebula-cert sign -name "{{ hostvars[item]['ansible_facts']['hostname'] }}" -ip "{{ hostvars[item]['nebula_internal_ip'] }}/{{ nebula_network_cidr }}" -duration "{{ nebula_client_cert_duration }}" {% if hostvars[item]['nebula_fw_groups'] is defined %}-groups "{% for group in hostvars[item]['nebula_fw_groups'] %}{{ group }}{{ ',' if not loop.last else '' }}{% endfor %}"{% endif %}
+  args:
+    executable: /bin/bash
+    chdir: /etc/nebula
+    creates: "/etc/nebula/{{ hostvars[item]['ansible_facts']['hostname'] }}.crt"
+  with_items: "{{ nebula_nodes_unflattened | flatten }}"

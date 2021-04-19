@@ -1,0 +1,17 @@
+---
+- hosts: 
+    - all
+  gather_facts: False
+  become: False
+  pre_tasks:
+    - name: Ping
+      ping:
+      tags: ping
+
+- hosts: 
+    - nebula_hosts
+  gather_facts: True
+  become: True
+  roles:
+    - role: hostname
+    - role: nebula

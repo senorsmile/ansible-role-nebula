@@ -1,0 +1,51 @@
+---
+- name: Read cert/key from lighthouse into memory where ansible is being run
+  slurp:
+    src: "/etc/nebula/{{ item }}"
+  register: lighthouse_files
+  delegate_to: "{{ groups.nebula_lighthouses[0] }}"
+  with_items: 
+    #- "{{ ansible_facts['hostname'] }}.crt"
+    #- "{{ ansible_facts['hostname'] }}.key"
+    - "{{ inventory_hostname }}.crt"
+    - "{{ inventory_hostname }}.key"
+    - ca.crt
+  when: ( not nebula_ca )
+
+- name: Copy Cert, Key, CA
+  copy:
+    dest: "/etc/nebula/{{ item['item'] }}"
+    content: "{{ item['content'] | b64decode }}"
+    owner: root
+    group: root
+    mode: 0600
+  loop: "{{ lighthouse_files.results }}"
+  loop_control:
+    label: "{{ item['item'] }}"
+  when: ( not nebula_ca )
+  notify: Restart Nebula
+
+- name: Nebula config file
+  template:
+    src: config.yml.j2 
+    dest: /etc/nebula/config.yml
+    owner: root
+    group: root
+    mode: '0400'
+  notify: Restart Nebula
+
+- name: Create Nebula service
+  template:
+    src: service.j2
+    dest: /etc/systemd/system/nebula.service
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Enable and start Nebula service
+  systemd: 
+    name: nebula
+    daemon_reload: yes
+    enabled: yes
+    masked: no
+    state: started

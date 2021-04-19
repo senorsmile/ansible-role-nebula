@@ -1,0 +1,13 @@
+---
+- include_tasks: download.yml
+
+- debug:
+    var: nebula_ca
+
+- name: Run CA
+  include_tasks: ca.yml
+  when: nebula_ca
+
+- name: Configure
+  include_tasks: configure.yml
+

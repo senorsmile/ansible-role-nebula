@@ -1,0 +1,35 @@
+- name: Set the hostname
+  become: true
+  hostname:
+      name: "{{ nebula_fqdn }}"
+
+- name: Re-gather facts
+  setup:
+
+- name: Add 127.0.1.1 in /etc/hosts
+  become: true
+  lineinfile:
+      dest: /etc/hosts
+      line: "127.0.1.1 {{ nebula_fqdn }}"
+      regexp: '^127\.0\.1\.1'
+      insertafter: '^127\.0\.0\.1'
+      state: present
+
+- name: Add 127.0.0.1 in /etc/hosts
+  become: true
+  lineinfile:
+      dest: /etc/hosts
+      line: "127.0.0.1 localhost {{ nebula_fqdn }}"
+      regexp: '^127\.0\.0\.1'
+      state: present
+
+- name: Add all hosts to /etc/hosts
+  become: true
+  lineinfile:
+      dest:   "/etc/hosts"
+      line:   "{{ hostvars[item]['ansible_host'] }} {{ item }} "
+      regexp: "{{ hostvars[item]['ansible_host'] }}"
+      state:  present
+  loop: "{{ groups['nebula_hosts'] }}"
+  tags:
+    - test

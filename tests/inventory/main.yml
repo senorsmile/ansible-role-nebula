@@ -1,0 +1,37 @@
+---
+vagrant:
+  vars:
+    ansible_ssh_common_args: '-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
+    ansible_user: vagrant
+    ansible_become_pass: vagrant
+    ansible_ssh_private_key_file: ".vagrant/machines/{{ inventory_hostname }}/virtualbox/private_key"
+
+  children:
+    nebula_hosts:
+      children:
+        nebula_lighthouses:
+          vars:
+            nebula_ca: True # this would usually be localhost or a trusted host
+            nebula_lighthouse: True
+          hosts:
+            node8701:
+              ansible_host: 192.168.87.101
+              nebula_internal_ip: 172.16.0.1
+              #nebula_lighthouse_hostname: "{{ inventory_hostname }}"
+              nebula_fw_groups:
+                - office
+
+        nebula_nodes:
+          hosts:
+            node8702:
+              ansible_host: 192.168.87.102
+              nebula_internal_ip: 172.16.0.2
+              nebula_fw_groups:
+                - home
+
+            node8801:
+              ansible_host: 192.168.88.101
+              nebula_internal_ip: 172.16.0.3
+              nebula_fw_groups:
+                - office
+                - home
